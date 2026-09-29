@@ -3,46 +3,50 @@ set -e
 
 # Configuration
 REPO_URL="https://github.com/JordanGrant3D/terminal-shortcuts.git"
-PROJECT_DIR="$HOME/Documents/terminal-shortcuts"
+PERMANENT_DIR="$HOME/.local/share/terminal-shortcuts"
 LOCAL_BIN="$HOME/.local/bin"
 TSHORT_LINK="$LOCAL_BIN/tshort"
 
 echo "🚀 Installing terminal-shortcuts..."
 
-# 1. Clone or update the repository
-if [ -d "$PROJECT_DIR" ]; then
-    echo "📁 Project directory already exists. Pulling latest changes..."
-    git -C "$PROJECT_DIR" pull
-else
-    echo "📥 Cloning repository into $PROJECT_DIR..."
-    git clone "$REPO_URL" "$PROJECT_DIR"
-fi
+# 1. Create a temporary directory and ensure it gets cleaned up on exit
+TEMP_DIR=$(mktemp -d)
+trap 'rm -rf "$TEMP_DIR"' EXIT
 
-# 2. Set up the Python virtual environment
+echo "📥 Cloning repository into temporary directory..."
+git clone "$REPO_URL" "$TEMP_DIR/terminal-shortcuts"
+
+# 2. Set up the Python virtual environment inside /tmp
 echo "🐍 Setting up Python virtual environment..."
-cd "$PROJECT_DIR"
+cd "$TEMP_DIR/terminal-shortcuts"
 python3 -m venv venv
 
-# Upgrade pip and install dependencies if you have a requirements.txt
+# Upgrade pip and install dependencies if requirements.txt exists
 ./venv/bin/pip install --upgrade pip
 if [ -f "requirements.txt" ]; then
     ./venv/bin/pip install -r requirements.txt
 fi
 
-# 3. Create ~/.local/bin directory if needed
+# 3. Move the project to its permanent directory
+echo "📂 Moving project to $PERMANENT_DIR..."
+mkdir -p "$(dirname "$PERMANENT_DIR")"
+rm -rf "$PERMANENT_DIR"
+mv "$TEMP_DIR/terminal-shortcuts" "$PERMANENT_DIR"
+
+# 4. Create ~/.local/bin directory if needed
 mkdir -p "$LOCAL_BIN"
 if [ -L "$TSHORT_LINK" ] || [ -e "$TSHORT_LINK" ]; then
     rm "$TSHORT_LINK"
 fi
 
-# 4. Create the wrapper script pointing to main.py
+# 5. Create the wrapper script pointing to main.py in the permanent folder
 echo "🔗 Creating command shortcut 'tshort'..."
 cat << EOF > "$TSHORT_LINK"
 #!/bin/bash
-exec "$PROJECT_DIR/venv/bin/python" "$PROJECT_DIR/main.py" "\$@"
+exec "$PERMANENT_DIR/venv/bin/python" "$PERMANENT_DIR/main.py" "\$@"
 EOF
 
-# 5. Make the wrapper script executable
+# 6. Make the wrapper script executable
 chmod +x "$TSHORT_LINK"
 
 echo "✅ Success! 'tshort' has been installed to $TSHORT_LINK"
