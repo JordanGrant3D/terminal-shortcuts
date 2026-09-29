@@ -5,7 +5,9 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "terminal-shortcuts"
 version = "0.1.0"
-dependencies = []
+dependencies = [
+  "prompt-toolkit",
+]
 
 [project.scripts]
 tshort = "main:main"
