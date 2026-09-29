@@ -11,14 +11,14 @@ To install just run:
 
 
 ```
-bash <(curl -fsSL https://raw.githubusercontent.com/JordanGrant3D/terminal-shortcuts/master/install.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/JordanGrant3D/terminal-shortcuts/refs/heads/master/install.sh)
 
 ```
 To uninstall just run:
 
 ```
 
-bash <(curl -fsSL https://raw.githubusercontent.com/JordanGrant3D/terminal-shortcuts/master/uninstall.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/JordanGrant3D/terminal-shortcuts/refs/heads/master/uninstall.sh)
 ```
 
 
